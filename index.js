@@ -114,4 +114,4 @@ msg.channel.send(exampleEmbed);
   
 });
 
-client.login('ODA2NzcyOTQ3MjY3MDkyNTEx.YBuT2w.3WgkPTt-awIGFZcFyJuDd3ochGg')
+client.login(process.env.TOKEN)
