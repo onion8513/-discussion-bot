@@ -11,13 +11,14 @@ let vote = false
 let voteresult = {}
 client.on('ready', () => {
   console.log(`Ready!`)
+  client.user.setPresence({
+    status: 'online',
+    activity: {
+        name: `!도움`,
+        type: "PLAYING"
+    }})
 });
-client.user.setPresence({
-  status: 'online',
-  activity: {
-      name: `!도움`,
-      type: "PLAYING"
-  }})
+
 client.on('message', (msg) => {
  if(msg.content == '!도움') {
   const exampleEmbed = new Discord.MessageEmbed()
