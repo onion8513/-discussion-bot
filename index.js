@@ -1,15 +1,19 @@
-const Discord = require('discord.js'); // 모듈을 가져온 뒤,
-const client = new Discord.Client(); // Discord.Client 객체 생성.
+const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
+const Discord = require('discord.js');
+const client = new Discord.Client();
+const fs = require('fs')
+const randtxt = require('./modules/randtxt')
+let db
 let opinions = []
 let subject
 let discussion = false
 let vote = false
 let voteresult = {}
-client.on('ready', () => { // 이벤트 리스너 (ready 이벤트)
+client.on('ready', () => {
   console.log(`Ready!`)
 });
 
-client.on('message', (msg) => { // 이벤트 리스너 (message 이벤트)
+client.on('message', (msg) => {
  if(msg.content == '!도움') {
   const exampleEmbed = new Discord.MessageEmbed()
 	.setColor('#0099ff')
@@ -25,6 +29,8 @@ client.on('message', (msg) => { // 이벤트 리스너 (message 이벤트)
     { name: '투표시작', value: '투표를 시작합니다.'},
     { name: '투표하기 [투표할 대상]', value: '[투표할 대상]에게 투표를 합니다.'},
     { name: '투표리스트', value: '의견이 몇표인지 보여줍니다.'},
+    { name: '토의저장', value: '현재 하고있는 토의를 저장합니다.'},
+    { name: '불러오기 [아이디]', value: '[아이디]에 대한 토의내용을 불러옵니다.'},
     { name: '종료', value: '투표를 종료합니다.'},
 	)
 
@@ -34,7 +40,8 @@ client.on('message', (msg) => { // 이벤트 리스너 (message 이벤트)
 msg.channel.send(exampleEmbed);
  }
   
-  else if (msg.content.startsWith('!토의시작')) { // discord.Message.content 속성이 'ping'과 같을 떄
+  
+  else if (msg.content.startsWith('!토의시작')) { 
     if(discussion == true) return msg.reply('토의가 이미 시작되었습니다')
     let args = msg.content.split('/') //1 = 주제
     subject = args[1]
@@ -52,7 +59,7 @@ msg.channel.send(exampleEmbed);
   }
   else if(msg.content === '!리스트') {
     if(discussion == false) return msg.reply('토의가 아직 시작되지 않았습니다')
-    if(opinions.length == 0) return  msg.channel.send('```diff\n- 아직 의견이 없습니다. !의견내기/[의견]을 이용해 의견을 추가해주세요.```')
+    if(opinions.length == 0) return  msg.channel.send('```diff\n- 아직 의견이 없습니다. !의견추가/[의견]을 이용해 의견을 추가해주세요.```')
     let list
     for(let i = 0; i<opinions.length; i++){
         if(!i == 0) list = list +`\n\n+ ${opinions[i]}`
@@ -102,16 +109,50 @@ msg.channel.send(exampleEmbed);
     }
     msg.channel.send('```주제: '+subject+'\n\n'+transfer+'\n\n```')
   }
+    else if(msg.content.startsWith('!토의저장')) {
+      if(discussion == false || vote == false) return msg.reply('토의를 저장하려면 토의를 모두 완료해야합니다 (투표까지)')
+      fs.readFile('discussions.json', 'utf8', (err, data) => {
+        let id = randtxt.makeid()
+        db = JSON.parse(data)
+        let transfer
+        for(let i = 0; i < opinions.length; i++){
+         let index = i + 1
+         if(voteresult[index] == undefined) voteresult[index] = 0
+         if(transfer == undefined) transfer = `${index}번(${opinions[i]}) : ${voteresult[index]}표\n\n`
+         else transfer = transfer + `${index}번(${opinions[i]}) : ${voteresult[index]}표\n\n`
+         
+        }
+        msg.reply(`저장되었습니다. !불러오기 ${id}를 입력해서 저장한 정보를 불러와보세요.`)
+        db[id] = {subject : subject, voteresult : transfer}
+        db.key = id
+        fs.writeFile('discussions.json', JSON.stringify(db),'utf8', (err) => {})
+        
+      })
+    }
+    else if(msg.content.startsWith('!불러오기')){
+      fs.readFile('discussions.json', 'utf8', (err, data) => {
+        db = JSON.parse(data)
+        
+        let args = msg.content.split(' ')
+      if(db[args[1]]) {
+        let dbsubject = db[args[1]].subject
+        let dbvoteresult = db[args[1]].voteresult
+        msg.reply('```diff\n주제 : '+dbsubject+'\n\n'+dbvoteresult+'```')
+      }
+      else msg.reply('유효하지 않은 아이디입니다.')
+      })
+    }
 
-  else if(msg.content === '!종료'){
-    if(discussion == false) return msg.reply('이미 토의가 종료되었습니다.')
-    msg.reply('토의가 종료되었습니다.')
-    discussion = false
-    vote = false
-    voteresult = {}
-    opinions = []
+    else if(msg.content === '!종료'){
+      if(discussion == false) return msg.reply('이미 토의가 종료되었습니다.')
+      msg.reply('토의가 종료되었습니다.')
+      discussion = false
+      vote = false
+      voteresult = {}
+      opinions = []
   }
-  
+   
 });
+    
 
 client.login(process.env.TOKEN)
