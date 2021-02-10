@@ -131,7 +131,7 @@ msg.channel.send(exampleEmbed);
         msg.reply(`저장되었습니다. !불러오기 ${id}를 입력해서 저장한 정보를 불러와보세요.`)
         db[id] = {subject : subject, voteresult : transfer}
         db.key = id
-        fs.writeFile('discussions.json', JSON.stringify(db),'utf8', (err) => {})
+        fs.writeFile('./discussions.json', JSON.stringify(db),'utf8', (err) => {})
         
       })
     }
