@@ -117,7 +117,7 @@ msg.channel.send(exampleEmbed);
   }
     else if(msg.content.startsWith('!토의저장')) {
       if(discussion == false || vote == false) return msg.reply('토의를 저장하려면 토의를 모두 완료해야합니다 (투표까지)')
-      fs.readFile('discussions.json', 'utf8', (err, data) => {
+      fs.readFile('./discussions.json', 'utf8', (err, data) => {
         let id = randtxt.makeid()
         db = JSON.parse(data)
         let transfer
