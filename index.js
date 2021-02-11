@@ -43,7 +43,7 @@ client.on('message', (msg) => {
 	.setTimestamp()
 	.setFooter('!도움', msg.author.avatarURL());
 
-msg.channel.send(exampleEmbed);
+msg.channel.send('꺼지세욧!!');
  }
   
   
