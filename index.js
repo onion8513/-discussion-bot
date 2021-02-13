@@ -21,7 +21,7 @@ client.on('ready', () => {
 
 client.on('message', (msg) => {
  if(msg.content == '!도움') {
-  const exampleEmbed = new Discord.MessageEmbed()
+  const help = new Discord.MessageEmbed()
 	.setColor('#0099ff')
   .setTitle('!도움')
   .setThumbnail(msg.author.avatarURL())
@@ -43,7 +43,7 @@ client.on('message', (msg) => {
 	.setTimestamp()
 	.setFooter('!도움', msg.author.avatarURL());
 
-msg.channel.send('꺼지세욧!!');
+msg.channel.send(help);
  }
   
   
